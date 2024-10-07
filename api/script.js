@@ -2,7 +2,6 @@ import { getDestinations } from "./model.js";
 
 window.addEventListener("load", async () => {
     const destinations = await getDestinations();
-    console.log(destinations);
 
     destinations.forEach((destination) => {
         renderDestinations(destination);

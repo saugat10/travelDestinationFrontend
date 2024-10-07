@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Page</title>
-    <link rel="stylesheet" href="assets/styles.css">
-    <link rel="stylesheet" href="assets/profile.css">
-    <script src="navbar.js" type="module"></script>
+    <link rel="stylesheet" href="../assets/styles.css">
+    <link rel="stylesheet" href="../assets/profile.css">
+    <script src="../assets/scripts/navbar.js" type="module"></script>
+    <script src="../assets/scripts/profile.js" type="module"></script>
 </head>
 <body>
     <div id="navbar-placeholder"></div>
@@ -20,23 +21,23 @@
         <div class="profile-details">
             <div>
                 <label for="first-name">First Name</label>
-                <div class="input-box" id="first-name">Saugat</div>
+                <input type="text" class="input-box" id="first-name" readonly>
             </div>
             <div>
                 <label for="last-name">Last Name</label>
-                <div class="input-box" id="last-name">Khatiwada</div>
+                <input type="text" class="input-box" id="last-name" readonly>
             </div>
             <div>
                 <label for="username">Username</label>
-                <div class="input-box" id="username">Saugat10</div>
+                <input type="text" class="input-box" id="username" readonly>
             </div>
             <div>
-                <label for="email">Email</label>
-                <div class="input-box" id="email">saugat10@gmail.com</div>
+                <label for="email-profile">Email</label>
+                <input type="text" class="input-box" id="email-profile" readonly>
             </div>
             <div>
                 <label for="password">Password</label>
-                <div class="input-box" id="password">********</div>
+                <input type="text" class="input-box" id="password-profile" readonly>
             </div>
         </div>
 
