@@ -27,6 +27,38 @@ window.addEventListener('load', async function () {
             const data = await response.json();
             displayUserData(data.user); // Call function to display user data
 
+            const userEmail = data.user.email;
+            const travelDestinationsResponse = await fetch(`http://localhost:8080/api/traveldestinations/byUserEmail/${userEmail}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const travelDestinations = await travelDestinationsResponse.json();
+            console.log(travelDestinations);
+
+            const tableBody = document.querySelector("#destination-table tbody");
+            tableBody.innerHTML = ""; // Clear any existing rows
+            travelDestinations.forEach(dest => {
+                const row = document.createElement("tr");
+            
+                row.innerHTML = `
+                  <td>${dest.title}</td>
+                  <td>${dest.description}</td>
+                  <td>${dest.location}</td>
+                  <td>${dest.country}</td>
+                  <td>${new Date(dest.dateFrom).toISOString().split('T')[0]}</td>
+                  <td>${new Date(dest.dateTo).toISOString().split('T')[0]}</td>
+                  <td class="action-buttons">
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                  </td>
+                `;
+            
+                tableBody.appendChild(row);
+              });
+            
         } catch (error) {
             console.error('Error fetching profile:', error);
             redirectToLogin('An error occurred while fetching your profile');
