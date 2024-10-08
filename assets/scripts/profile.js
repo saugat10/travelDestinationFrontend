@@ -11,7 +11,6 @@ window.addEventListener('load', async function () {
     };
 
     if (token) {
-
         try {
             /*RETRIEVE USER INFO*/
             const userData = await fetchUser(token);
@@ -19,37 +18,7 @@ window.addEventListener('load', async function () {
 
             /*RETRIEVE USER TRAVEL DEST*/
             const userEmail = userData.user.email;
-            const travelDestinationsResponse = await fetch(`http://localhost:8080/api/traveldestinations/byUserEmail/${userEmail}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const travelDestinations = await travelDestinationsResponse.json();
-
-
-            const tableBody = document.querySelector("#destination-table tbody");
-            tableBody.innerHTML = ""; // Clear any existing rows
-
-            travelDestinations.forEach(dest => {
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-                  <td>${dest.title}</td>
-                  <td>${dest.description}</td>
-                  <td>${dest.location}</td>
-                  <td>${dest.country}</td>
-                  <td>${new Date(dest.dateFrom).toISOString().split('T')[0]}</td>
-                  <td>${new Date(dest.dateTo).toISOString().split('T')[0]}</td>
-                  <td class="action-buttons">
-                    <button class="edit-btn">Edit</button>
-                    <button class="delete-btn">Delete</button>
-                  </td>
-                `;
-
-                tableBody.appendChild(row);
-            });
+            fetchTravelDestinations(userEmail, token);
 
             /*RETRIEVE LOCATION*/
             const locationResponse = await fetch(`http://localhost:8080/api/locations/`, {
@@ -63,7 +32,7 @@ window.addEventListener('load', async function () {
 
         } catch (error) {
             console.error('Error fetching profile:', error);
-            redirectToLogin('An error occurred while fetching your profile');
+            //redirectToLogin('An error occurred while fetching your profile');
         }
     } else {
         // No token found, redirect to login
@@ -117,6 +86,51 @@ function populateLocationDropdown(locations) {
     });
 }
 
+async function fetchTravelDestinations(userEmail, token) {
+    try {
+        console.log("reached");
+        
+        const travelDestinationsResponse = await fetch(`http://localhost:8080/api/traveldestinations/byUserEmail/${userEmail}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    
+        const travelDestinations = await travelDestinationsResponse.json();
+    
+        console.log(travelDestinations);
+        
+        populateDestinationsTable(travelDestinations)
+    } catch (error) {
+        console.error('Error fetching destinations:', error);
+    }
+}
+
+function populateDestinationsTable(travelDestinations) {
+    const tableBody = document.querySelector("#destination-table tbody");
+    tableBody.innerHTML = ""; // Clear any existing rows
+
+    travelDestinations.forEach(dest => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${dest.title}</td>
+          <td>${dest.description}</td>
+          <td>${dest.location}</td>
+          <td>${dest.country}</td>
+          <td>${new Date(dest.dateFrom).toISOString().split('T')[0]}</td>
+          <td>${new Date(dest.dateTo).toISOString().split('T')[0]}</td>
+          <td class="action-buttons">
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn">Delete</button>
+          </td>
+        `;
+
+        tableBody.appendChild(row);
+    });
+}
+
 
 // Event listener for submitting the new travel destination form
 document.getElementById('destination-form').addEventListener('submit', async function (e) {
@@ -141,15 +155,14 @@ document.getElementById('destination-form').addEventListener('submit', async fun
 
     try {
         const token = sessionStorage.getItem('token');
-        const userData = await fetchUser(token); // Assuming fetchUser(token) returns the user data
+        const userData = await fetchUser(token); 
 
         // Combine newDestination and userData into one object
         const destinationWithUser = {
             ...newDestination, 
             user: userData.user 
         };
-        console.log(destinationWithUser);
-    
+
         const response = await fetch('http://localhost:8080/api/traveldestinations', {
             method: 'POST',
             headers: {
@@ -161,8 +174,8 @@ document.getElementById('destination-form').addEventListener('submit', async fun
 
         if (response.ok) {
             const createdDestination = await response.json();
+            fetchTravelDestinations(userData.user.email, token)
             console.log('New travel destination added:', createdDestination);
-            // Optionally: refresh or update the travel destinations table
         } else {
             const errorData = await response.json();
             console.error('Error adding destination:', errorData);
