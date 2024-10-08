@@ -1,5 +1,6 @@
 window.addEventListener('load', async function () {
     const token = sessionStorage.getItem('token');
+    
     // Function to redirect with a message
     const redirectToLogin = (message) => {
         //TODO: improve ux/ui on error handling
