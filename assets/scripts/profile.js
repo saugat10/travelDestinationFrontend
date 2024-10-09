@@ -153,7 +153,7 @@ async function fetchTravelDestinations(userEmail, token) {
     }
 }
 
-//Populates table with data fetched
+// Populates table with data fetched
 function populateDestinationsTable(travelDestinations) {
     const tableBody = document.querySelector("#destination-table tbody");
     tableBody.innerHTML = ""; // Clear any existing rows
@@ -164,14 +164,18 @@ function populateDestinationsTable(travelDestinations) {
         row.innerHTML = `
           <td><input type="text" value="${dest.title}" disabled></td>
           <td><input type="text" value="${dest.description}" disabled></td>
-          <td><input type="text" value="${dest.location}" disabled></td>
+          <td>
+            <select id="location-${dest._id}" disabled>
+              <option value="${dest.location}" selected>${dest.location}</option>
+            </select>
+          </td>
           <td><input type="text" value="${dest.country}" disabled></td>
           <td><input type="date" value="${new Date(dest.dateFrom).toISOString().split('T')[0]}" disabled></td>
           <td><input type="date" value="${new Date(dest.dateTo).toISOString().split('T')[0]}" disabled></td>
           <td class="action-buttons">
             <button class="edit-btn" data-id="${dest._id}">Edit</button>
             <button class="delete-btn" data-id="${dest._id}">Delete</button>
-        </td>
+          </td>
         `;
 
         tableBody.appendChild(row);
@@ -191,20 +195,34 @@ function addEditButtonListeners() {
     });
 }
 
+
 // Function to handle the edit button click event
-// Function to handle the edit button click event
-function handleEditButtonClick(event) {
+async function handleEditButtonClick(event) {
     const row = event.target.closest("tr");
     const inputs = row.querySelectorAll("input");
+    const select = row.querySelector("select");
     const isDisabled = inputs[0].disabled; // Check the disabled state of the first input
 
     // Store original values for undo
     const originalValues = Array.from(inputs).map(input => input.value);
+    const originalLocation = select.value; // Store the original location
 
-    // Toggle disabled attribute on inputs
+    // Toggle disabled attribute on inputs and select
     inputs.forEach(input => {
         input.disabled = !isDisabled; // Set the opposite state
     });
+    select.disabled = !isDisabled; // Set the opposite state for the select
+
+    const token = sessionStorage.getItem('token');
+    const locationResponse = await fetch(`http://localhost:8080/api/locations/`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    const locations = await locationResponse.json();
+    // Populate the location dropdown with the original value selected
+    populateLocationDropdown(locations, select.id, originalLocation);
 
     // Change the button text and functionality
     const editButton = event.target;
@@ -213,7 +231,7 @@ function handleEditButtonClick(event) {
     saveButton.className = "save-btn";
     saveButton.dataset.id = editButton.dataset.id; // Maintain the same ID
     saveButton.addEventListener("click", () => {
-        handleSaveButtonClick(inputs, saveButton, originalValues);
+        handleSaveButtonClick(inputs, select, saveButton, originalValues);
     });
 
     // Create the undo button
@@ -221,7 +239,7 @@ function handleEditButtonClick(event) {
     undoButton.textContent = "Undo";
     undoButton.className = "undo-btn";
     undoButton.addEventListener("click", () => {
-        handleUndoButtonClick(inputs, originalValues);
+        handleUndoButtonClick(inputs, select, originalValues, originalLocation);
     });
 
     // Replace edit and delete buttons with save and undo
@@ -232,14 +250,14 @@ function handleEditButtonClick(event) {
 }
 
 // Function to handle the save button click event
-function handleSaveButtonClick(inputs, saveButton, originalValues) {
+function handleSaveButtonClick(inputs, select, saveButton, originalValues) {
     const updatedObject = {
         title: inputs[0].value,
         description: inputs[1].value,
-        location: inputs[2].value,
-        country: inputs[3].value,
-        dateFrom: inputs[4].value,
-        dateTo: inputs[5].value,
+        location: select.value, // Get the selected value from the dropdown
+        country: inputs[2].value,
+        dateFrom: inputs[3].value,
+        dateTo: inputs[4].value,
     };
 
     // Print the updated object to the console
@@ -249,6 +267,7 @@ function handleSaveButtonClick(inputs, saveButton, originalValues) {
     inputs.forEach(input => {
         input.disabled = true;
     });
+    select.disabled = true; // Disable the select
 
     // Restore the edit button
     const editButton = document.createElement("button");
@@ -273,17 +292,28 @@ function handleSaveButtonClick(inputs, saveButton, originalValues) {
 }
 
 // Function to handle the undo button click event
-function handleUndoButtonClick(inputs, originalValues) {
+function handleUndoButtonClick(inputs, select, originalValues, originalLocation) {
     // Restore original values and disable inputs
     inputs.forEach((input, index) => {
         input.value = originalValues[index]; // Set original value
         input.disabled = true; // Disable input
     });
 
+    // Disable the select and set its value to the original location
+    // Reset the select element
+    select.innerHTML = ''; // Clear existing options
+    const option = document.createElement('option');
+    option.value = originalLocation; // Set the value to the original location
+    option.textContent = originalLocation; // Display the original location
+    select.appendChild(option); // Add the original location as the only option
+    select.disabled = true; // Disable the select
+
+
     // Restore the edit button
     const editButton = document.createElement("button");
     editButton.textContent = "Edit";
     editButton.className = "edit-btn";
+    editButton.dataset.id = inputs[0].dataset.id; // Use the same ID
     editButton.addEventListener("click", (e) => {
         handleEditButtonClick(e);
     });
