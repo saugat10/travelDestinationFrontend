@@ -13,6 +13,7 @@ fetch('./navbar.html')
     const signUpBtn = document.getElementById('signUpBtn');
     const closeSignUpModal = document.getElementById('closeSignUpModal');
     const signInForm = document.getElementById('signInForm');
+    const signUpForm = document.getElementById('signUpForm');
     const notification = document.getElementById('notification');
 
     hamburger.addEventListener('click', () => {
@@ -84,4 +85,44 @@ fetch('./navbar.html')
         showNotification('An error occurred while signing up. Please try again.', 'error');
       }
     });
+
+    signUpForm.addEventListener('submit', async function (e) {
+      e.preventDefault(); // Prevent default form submission
+
+      // Get form inputs
+      const firstname = document.getElementById('firstName').value;
+      const lastname = document.getElementById('lastName').value;
+      const username = document.getElementById('userName').value;
+      const email = document.getElementById('signUpEmail').value;
+      const password = document.getElementById('signUpPassword').value;
+
+      // Make the POST request to the backend
+      try{
+        const response = await fetch('http://localhost:8080/api/users',{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ firstname, lastname, username, email, password }) // Send user details as JSON
+        });
+        const data = await response.json();
+
+        if(response.ok){
+          showNotification('Sign up successful!', 'success');
+          setTimeout(() => {
+            if(signUpModal){
+              signUpModal.style.display = 'none';
+            }
+            window.location.href = '../../pages/index.html';
+          },1000);
+          
+          
+        } else{
+          showNotification(`Sign up failed: ${data.message}`, 'error');;
+        }
+      }catch(e){
+        showNotification("An error occurred", e.message, 'error');
+      }
+    });
+    
   });
