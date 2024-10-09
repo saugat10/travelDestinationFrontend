@@ -1,15 +1,5 @@
 window.addEventListener('load', async function () {
     const token = sessionStorage.getItem('token');
-
-    // Function to redirect with a message
-    const redirectToLogin = (message) => {
-        //TODO: improve ux/ui on error handling
-        document.body.innerHTML = `<h2>${message}, redirecting to login...</h2>`;
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 3000);
-    };
-
     if (token) {
         try {
             /*RETRIEVE USER INFO*/
@@ -89,83 +79,6 @@ document.getElementById('destination-form').addEventListener('submit', async fun
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-    }
-});
-
-document.querySelector("#destination-table tbody").addEventListener('click', async function (e) {
-    e.preventDefault();
-
-    if (e.target.classList.contains('delete-btn')) {
-        const destinationId = e.target.getAttribute('data-id');
-
-        const userConfirmed = confirm('Are you sure you want to delete this item?');
-
-        if (userConfirmed) {
-            await deleteDestination(destinationId);
-        }
-    }
-});
-
-document.getElementById('destination-table').addEventListener('click', async function (e) {
-    if (e.target.classList.contains('edit-btn')) {
-        const row = e.target.closest('tr');
-        const cells = row.querySelectorAll('td');
-        const destId = e.target.dataset.id;
-        // Store the original values before editing
-        const originalTitle = cells[0].textContent.trim();
-        const originalDescription = cells[1].textContent.trim();
-        const originalLocation = cells[2].textContent.trim();
-        const originalCountry = cells[3].textContent.trim();
-        const originalStartDate = cells[4].textContent.trim();
-        const originalEndDate = cells[5].textContent.trim();
-
-        // Replace description with a text input (fits existing styles)
-        cells[0].innerHTML = `<input type="text" value="${cells[0].textContent}" id="edit-title" class="edit-input-box">`;
-        cells[1].innerHTML = `<input type="text" value="${cells[1].textContent}" id="edit-description" class="edit-input-box">`;
-
-        // Get the original location value
-        //TODO: attach eventlistener so that when selecting a new location, update the country
-        cells[2].innerHTML = `
-        <select id="edit-location" class="input-box">
-        </select>
-        `
-        const token = sessionStorage.getItem('token');
-        const locationResponse = await fetch(`http://localhost:8080/api/locations/`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        const locations = await locationResponse.json();
-        populateLocationDropdown(locations, 'edit-location', originalLocation);
-
-        // Convert start and end dates to input fields
-        cells[4].innerHTML = `<input type="date" value="${new Date(cells[4].textContent).toISOString().split('T')[0]}" id="edit-start-date" class="input-box">`;
-        cells[5].innerHTML = `<input type="date" value="${new Date(cells[5].textContent).toISOString().split('T')[0]}" id="edit-end-date" class="input-box">`;
-
-        // Replace the action buttons with "Edit" and "Delete"
-        cells[6].innerHTML = `
-        <button id="save-btn" class="save-btn" data-id="${destId}">Save</button>
-        <button id="cancel-btn" class="cancel-btn" data-id="${destId}">Undo</button>
-        `;
-
-        // Attach event listener to the "Cancel" button to revert the changes
-        cells[6].querySelector('.cancel-btn').addEventListener('click', function () {
-            // Revert the cells back to their original values
-            cells[0].textContent = originalTitle;
-            cells[1].textContent = originalDescription;
-            cells[2].textContent = originalLocation;
-            cells[3].textContent = originalCountry;
-            cells[4].textContent = originalStartDate;
-            cells[5].textContent = originalEndDate;
-
-            // Replace the action buttons with "Edit" and "Delete"
-            cells[6].innerHTML = `
-          <button class="edit-btn" data-id="${destId}">Edit</button>
-            <button class="delete-btn" data-id="${destId}">Delete</button>
-        `;
-        });
-
     }
 });
 
@@ -249,13 +162,13 @@ function populateDestinationsTable(travelDestinations) {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-          <td>${dest.title}</td>
-          <td>${dest.description}</td>
-          <td>${dest.location}</td>
-          <td>${dest.country}</td>
-          <td>${new Date(dest.dateFrom).toISOString().split('T')[0]}</td>
-          <td>${new Date(dest.dateTo).toISOString().split('T')[0]}</td>
-         <td class="action-buttons">
+          <td><input type="text" value="${dest.title}" disabled></td>
+          <td><input type="text" value="${dest.description}" disabled></td>
+          <td><input type="text" value="${dest.location}" disabled></td>
+          <td><input type="text" value="${dest.country}" disabled></td>
+          <td><input type="date" value="${new Date(dest.dateFrom).toISOString().split('T')[0]}" disabled></td>
+          <td><input type="date" value="${new Date(dest.dateTo).toISOString().split('T')[0]}" disabled></td>
+          <td class="action-buttons">
             <button class="edit-btn" data-id="${dest._id}">Edit</button>
             <button class="delete-btn" data-id="${dest._id}">Delete</button>
         </td>
@@ -263,6 +176,128 @@ function populateDestinationsTable(travelDestinations) {
 
         tableBody.appendChild(row);
     });
+
+    // Add event listeners for the edit buttons
+    addEditButtonListeners();
+}
+
+// Function to add event listeners to the edit buttons
+function addEditButtonListeners() {
+    const editButtons = document.querySelectorAll(".edit-btn");
+    editButtons.forEach(button => {
+        button.addEventListener("click", (e) => {
+            handleEditButtonClick(e);
+        });
+    });
+}
+
+// Function to handle the edit button click event
+// Function to handle the edit button click event
+function handleEditButtonClick(event) {
+    const row = event.target.closest("tr");
+    const inputs = row.querySelectorAll("input");
+    const isDisabled = inputs[0].disabled; // Check the disabled state of the first input
+
+    // Store original values for undo
+    const originalValues = Array.from(inputs).map(input => input.value);
+
+    // Toggle disabled attribute on inputs
+    inputs.forEach(input => {
+        input.disabled = !isDisabled; // Set the opposite state
+    });
+
+    // Change the button text and functionality
+    const editButton = event.target;
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Save";
+    saveButton.className = "save-btn";
+    saveButton.dataset.id = editButton.dataset.id; // Maintain the same ID
+    saveButton.addEventListener("click", () => {
+        handleSaveButtonClick(inputs, saveButton, originalValues);
+    });
+
+    // Create the undo button
+    const undoButton = document.createElement("button");
+    undoButton.textContent = "Undo";
+    undoButton.className = "undo-btn";
+    undoButton.addEventListener("click", () => {
+        handleUndoButtonClick(inputs, originalValues);
+    });
+
+    // Replace edit and delete buttons with save and undo
+    const actionButtons = row.querySelector(".action-buttons");
+    actionButtons.innerHTML = ""; // Clear existing buttons
+    actionButtons.appendChild(saveButton);
+    actionButtons.appendChild(undoButton);
+}
+
+// Function to handle the save button click event
+function handleSaveButtonClick(inputs, saveButton, originalValues) {
+    const updatedObject = {
+        title: inputs[0].value,
+        description: inputs[1].value,
+        location: inputs[2].value,
+        country: inputs[3].value,
+        dateFrom: inputs[4].value,
+        dateTo: inputs[5].value,
+    };
+
+    // Print the updated object to the console
+    console.log("Updated Object:", updatedObject);
+
+    // Disable inputs after saving
+    inputs.forEach(input => {
+        input.disabled = true;
+    });
+
+    // Restore the edit button
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.className = "edit-btn";
+    editButton.dataset.id = saveButton.dataset.id;
+    editButton.addEventListener("click", (e) => {
+        handleEditButtonClick(e);
+    });
+
+    // Restore the delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.className = "delete-btn";
+    deleteButton.dataset.id = saveButton.dataset.id;
+
+    // Replace save and undo buttons with edit and delete
+    const actionButtons = saveButton.parentElement;
+    actionButtons.innerHTML = ""; // Clear existing buttons
+    actionButtons.appendChild(editButton);
+    actionButtons.appendChild(deleteButton);
+}
+
+// Function to handle the undo button click event
+function handleUndoButtonClick(inputs, originalValues) {
+    // Restore original values and disable inputs
+    inputs.forEach((input, index) => {
+        input.value = originalValues[index]; // Set original value
+        input.disabled = true; // Disable input
+    });
+
+    // Restore the edit button
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.className = "edit-btn";
+    editButton.addEventListener("click", (e) => {
+        handleEditButtonClick(e);
+    });
+
+    // Restore the delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.className = "delete-btn";
+
+    // Replace undo and save buttons with edit and delete
+    const actionButtons = inputs[0].closest("td").parentElement.querySelector(".action-buttons");
+    actionButtons.innerHTML = ""; // Clear existing buttons
+    actionButtons.appendChild(editButton);
+    actionButtons.appendChild(deleteButton);
 }
 
 // Function to handle deleting a destination
@@ -286,3 +321,12 @@ async function deleteDestination(destinationId) {
         console.error('Error deleting destination:', error);
     }
 }
+
+// Function to redirect with a message
+const redirectToLogin = (message) => {
+    //TODO: improve ux/ui on error handling
+    document.body.innerHTML = `<h2>${message}, redirecting to login...</h2>`;
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 3000);
+};
