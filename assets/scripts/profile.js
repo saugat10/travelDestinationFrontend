@@ -208,8 +208,10 @@ async function handleEditButtonClick(event) {
     const originalLocation = select.value; // Store the original location
 
     // Toggle disabled attribute on inputs and select
-    inputs.forEach(input => {
-        input.disabled = !isDisabled; // Set the opposite state
+    inputs.forEach((input, index) => {
+        if (index !== 2) { // Assuming the country input is at index 3
+            input.disabled = !isDisabled; // Set the opposite state for all inputs except country
+        }
     });
     select.disabled = !isDisabled; // Set the opposite state for the select
 
@@ -255,7 +257,7 @@ function handleSaveButtonClick(inputs, select, saveButton, originalValues) {
         title: inputs[0].value,
         description: inputs[1].value,
         location: select.value, // Get the selected value from the dropdown
-        country: inputs[2].value,
+        country: inputs[2].value, //TODO: never modify country manually, just modify the location and then fetch the country location
         dateFrom: inputs[3].value,
         dateTo: inputs[4].value,
     };
