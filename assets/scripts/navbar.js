@@ -152,7 +152,7 @@ fetch("./navbar.html")
           field.value = "";
         });
         signUpModal.style.display = "none";
-        console.log("User registered successfully:", response);
+        showNotification("User Registered", "success")
       }
     });
 

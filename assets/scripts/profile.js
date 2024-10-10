@@ -10,6 +10,7 @@ window.addEventListener('load', async function () {
 
             /*RETRIEVE USER TRAVEL DEST*/
             const userEmail = userData.user.email;
+            
             fetchTravelDestinations(userEmail, token);
 
             /*RETRIEVE LOCATION*/
@@ -74,6 +75,7 @@ document.getElementById('destination-form').addEventListener('submit', async fun
 
         if (response.ok) {
             const createdDestination = await response.json();
+            showNotification("Trave Destination creates.", "success")
             fetchTravelDestinations(userData.user.email, token)
         } else {
             const errorData = await response.json();
@@ -141,6 +143,7 @@ function populateLocationDropdown(locations, dropdownId, selectedLocation) {
 //Fetches travel destination and then call populateTable
 async function fetchTravelDestinations(userEmail, token) {
     try {
+    
         const travelDestinationsResponse = await fetch(`http://localhost:8080/api/traveldestinations/byUserEmail/${userEmail}`, {
             method: 'GET',
             headers: {
@@ -161,29 +164,32 @@ function populateDestinationsTable(travelDestinations) {
     const tableBody = document.querySelector("#destination-table tbody");
     tableBody.innerHTML = ""; // Clear any existing rows
 
-    travelDestinations.forEach(dest => {
-        const row = document.createElement("tr");
+    if (travelDestinations.length > 0) {
 
-        row.innerHTML = `
-          <td><input type="text" value="${dest.title}" disabled></td>
-          <td><input type="text" value="${dest.description}" disabled></td>
-          <td>
+        travelDestinations.forEach(dest => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+            <td><input type="text" value="${dest.title}" disabled></td>
+            <td><input type="text" value="${dest.description}" disabled></td>
+            <td>
             <select id="location-${dest._id}" disabled>
-              <option value="${dest.location}" selected>${dest.location}</option>
+            <option value="${dest.location}" selected>${dest.location}</option>
             </select>
-          </td>
-          <td><input type="text" value="${dest.country}" disabled></td>
-          <td><input type="date" value="${new Date(dest.dateFrom).toISOString().split('T')[0]}" disabled></td>
-          <td><input type="date" value="${new Date(dest.dateTo).toISOString().split('T')[0]}" disabled></td>
-          <td class="action-buttons">
+            </td>
+            <td><input type="text" value="${dest.country}" disabled></td>
+            <td><input type="date" value="${new Date(dest.dateFrom).toISOString().split('T')[0]}" disabled></td>
+            <td><input type="date" value="${new Date(dest.dateTo).toISOString().split('T')[0]}" disabled></td>
+            <td class="action-buttons">
             <button class="edit-btn" data-id="${dest._id}">Edit</button>
             <button id="delete-btn" class="delete-btn" data-id="${dest._id}">Delete</button>
-          </td>
-        `;
+            </td>
+            `;
 
-        tableBody.appendChild(row);
-    });
+            tableBody.appendChild(row);
+        });
 
+    }
     // Add event listeners for the edit buttons
     addEditButtonListeners();
     // Add event listenr for the delete button
@@ -230,15 +236,15 @@ async function deleteDestination(destinationId) {
 
             if (response.ok) {
                 document.querySelector(`button[data-id="${destinationId}"]`).closest('tr').remove();
-                alert('Travel destination deleted successfully.');
+                showNotification("Travel destination deleted successfully.", "success")
             } else {
                 console.error(`Failed to delete destination with ID ${destinationId}.`);
-                alert('Failed to delete the travel destination. Please try again.');
+                showNotification("Failed to delete the travel destination. Please try again.", "error")
             }
 
         } catch (error) {
             console.error('Error deleting destination:', error);
-            alert('An error occurred while deleting the destination.');
+            showNotification("An error occurred while deleting the destination.", "error")
         }
     }
 }
@@ -331,11 +337,11 @@ function handleSaveButtonClick(inputs, select, saveButton) {
             }
         })
         .then(data => {
-            
+
             //get from the response the country name and set it to the input[3]
             console.log(data);
             inputs[2].value = data.country.country
-            
+
             showNotification("Data succesfully updated!", "success")
 
             // Disable inputs after saving
@@ -367,7 +373,7 @@ function handleSaveButtonClick(inputs, select, saveButton) {
         })
         .catch(error => {
             console.error("Error updating destination:", error);
-            alert('An error occurred while updating the destination.');
+            showNotification("An error occurred while updating the destination.", "error")
         });
 }
 
