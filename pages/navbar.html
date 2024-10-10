@@ -1,24 +1,25 @@
 <!-- Add a div for showing the custom alert message -->
 <div id="notification" class="notification hidden"></div>
 <nav class="navbar">
-    <div class="navbar-container">
-      <div class="navbar-title">
-        <h1> <a class= "nav-link" href="index.html">Travel Destination</a></h1>
-      </div>
-      <div class="hamburger" id="hamburger">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </div>
-      <div class="navbar-links" id="navbarLinks">
-        <a href="#" class="nav-link button"  id="signInBtn">Sign In</a>
-        <a href="#" class="nav-link button" id="signUpBtn">Sign Up</a>
-        <a href="profile.html" class="nav-link button hidden" id="profileBtn">
-          <img src="../assets/userIcon.png" style="width: 30px; height: 30px;">  Profile
-        </a>
-        <a href="#" class="nav-link button hidden" id="signOutBtn">Sign Out</a>
-      </div>
+  <div class="navbar-container">
+    <div class="navbar-title">
+      <h1><a class="nav-link" href="index.html">Travel Destination</a></h1>
     </div>
+    <div class="hamburger" id="hamburger">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+    <div class="navbar-links" id="navbarLinks">
+      <a href="#" class="nav-link button" id="signInBtn">Sign In</a>
+      <a href="#" class="nav-link button" id="signUpBtn">Sign Up</a>
+      <a href="profile.html" class="nav-link button hidden" id="profileBtn">
+        <img src="../assets/userIcon.png" alt="User icon" style="width: 30px; height: 30px" />
+        Profile
+      </a>
+      <a href="#" class="nav-link button hidden" id="signOutBtn">Sign Out</a>
+    </div>
+  </div>
 </nav>
 
 <!--SignIn Modal start-->
@@ -28,9 +29,9 @@
     <h2>Sign In</h2>
     <form id="signInForm">
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required>
+      <input type="email" id="email" name="email" required />
       <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
+      <input type="password" id="password" name="password" required />
       <button type="submit">Sign In</button>
     </form>
   </div>
@@ -42,19 +43,38 @@
   <div class="modal-content">
     <span class="close-btn" id="closeSignUpModal">&times;</span>
     <h2>Sign Up</h2>
-    <form id="signUpForm">
-      <label for="firstName">First Name:</label>
-      <input type="text" id="firstName" name="firstName" required>
-      <label for="lastName">Last Name:</label>
-      <input type="text" id="lastName" name="lastName" required>
-      <label for="username">Username:</label>
-      <input type="text" id="userName" name="userName" required>
-      <label for="email">Email:</label>
-      <input type="email" id="signUpEmail" name="email" required>
-      <label for="password">Password:</label>
-      <input type="password" id="signUpPassword" name="password" required>
-      <label for="password">Confirm Password:</label>
-      <input type="password" id="signUpConfirmPassword" name="password" required>
+    <form id="signUpForm" method="POST">
+      <div class="signUpField-container">
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname" />
+        <span class="errorMessage" id="firstnameError">Some error here</span>
+      </div>
+      <div class="signUpField-container">
+        <label for="lastname">Last Name:</label>
+        <input type="text" id="lastname" name="lastname" />
+        <span class="errorMessage" id="lastnameError">Some error here</span>
+      </div>
+      <div class="signUpField-container">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" />
+        <span class="errorMessage" id="usernameError">Some error here</span>
+      </div>
+      <div class="signUpField-container">
+        <label for="email">Email:</label>
+        <input type="email" id="signUpEmail" name="email" />
+        <span class="errorMessage" id="signUpEmailError">Some error here</span>
+      </div>
+      <div class="signUpField-container">
+        <label for="password">Password:</label>
+        <input type="password" id="signUpPassword" name="password" />
+        <span class="errorMessage" id="signUpPasswordError">Some error here</span>
+      </div>
+      <div class="signUpField-container">
+        <label for="password">Confirm Password:</label>
+        <input type="password" id="signUpConfirmPassword" name="confirmPassword" />
+        <span class="errorMessage" id="signUpConfirmPasswordError">Some error here</span>
+      </div>
+
       <button type="submit">Sign Up</button>
     </form>
   </div>
