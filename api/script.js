@@ -10,6 +10,7 @@ window.addEventListener("load", async () => {
     const token = sessionStorage.getItem('token')
     if(token) {
         const userDestinations = await getUserDestinations();
+        //TODO: create the my destinations section in the landing page.
     }
 })
 

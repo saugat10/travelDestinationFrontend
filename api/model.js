@@ -13,9 +13,7 @@ export async function getUserDestinations() {
       }
     });
 
-    const travelDestinations = await travelDestinationsResponse.json();
-    console.log(travelDestinations);
-    
+    const travelDestinations = await travelDestinationsResponse.json();    
   }
 
 }
