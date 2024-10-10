@@ -1,3 +1,5 @@
+import { showNotification } from "./notification.js";
+
 window.addEventListener('load', async function () {
     const token = sessionStorage.getItem('token');
     if (token) {
@@ -312,6 +314,7 @@ function handleSaveButtonClick(inputs, select, saveButton) {
 
     // Call the update endpoint (PUT request)
     const token = sessionStorage.getItem('token');
+
     fetch(`http://localhost:8080/api/traveldestinations/${destinationId}`, {
         method: 'PUT',
         headers: {
@@ -328,8 +331,12 @@ function handleSaveButtonClick(inputs, select, saveButton) {
             }
         })
         .then(data => {
-            console.log("Update successful:", data);
-            alert('Travel destination updated successfully.');
+            
+            //get from the response the country name and set it to the input[3]
+            console.log(data);
+            inputs[2].value = data.country.country
+            
+            showNotification("Data succesfully updated!", "success")
 
             // Disable inputs after saving
             inputs.forEach(input => {
@@ -362,9 +369,6 @@ function handleSaveButtonClick(inputs, select, saveButton) {
             console.error("Error updating destination:", error);
             alert('An error occurred while updating the destination.');
         });
-
-    // Print the updated object to the console
-    console.log("Updated Object:", updatedObject);
 }
 
 // Function to handle the undo button click event

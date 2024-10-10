@@ -78,10 +78,6 @@ fetch("./navbar.html")
           signUpBtn.classList.add("hidden");
           profileBtn.classList.remove("hidden");
           signOutBtn.classList.remove("hidden");
-          //TODO:
-          // - maybe do not redirect but just log in
-          // - show navbar as signed up user as well
-          // - close popup
         } else {
           showNotification(`Sign up failed: ${data.message}`, "error");
         }
@@ -155,6 +151,7 @@ fetch("./navbar.html")
         document.querySelectorAll(".signUpField").forEach((field) => {
           field.value = "";
         });
+        signUpModal.style.display = "none";
         console.log("User registered successfully:", response);
       }
     });
