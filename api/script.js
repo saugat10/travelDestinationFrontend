@@ -1,4 +1,4 @@
-import { getDestinations } from "./model.js";
+import { getDestinations, getUserDestinations } from "./model.js";
 
 window.addEventListener("load", async () => {
     const destinations = await getDestinations();
@@ -6,8 +6,12 @@ window.addEventListener("load", async () => {
     destinations.forEach((destination) => {
         renderDestinations(destination);
     })
-})
 
+    const token = sessionStorage.getItem('token')
+    if(token) {
+        const userDestinations = await getUserDestinations();
+    }
+})
 
 function renderDestinations(destination) {
     const destinationsContainer = document.getElementById('destinations-container');
