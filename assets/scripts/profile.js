@@ -1,3 +1,5 @@
+import { showNotification } from "./notification.js";
+
 window.addEventListener('load', async function () {
     const token = sessionStorage.getItem('token');
     if (token) {
@@ -30,6 +32,13 @@ window.addEventListener('load', async function () {
     }
 });
 
+const editButton = document.getElementById('edit-button');
+const undoButton = document.getElementById('undo-button');
+const updateButton = document.getElementById('update-button');
+const firstNameField = document.getElementById('first-name');
+const lastNameField = document.getElementById('last-name');
+const userNameField = document.getElementById('username-profile');
+const emailField = document.getElementById('email-profile');
 //  new travel destination form
 document.getElementById('destination-form').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -81,6 +90,72 @@ document.getElementById('destination-form').addEventListener('submit', async fun
         console.error('Error submitting form:', error);
     }
 });
+
+editButton.addEventListener('click', function(){
+    editButton.classList.add("hidden");
+    undoButton.classList.remove("hidden");
+    updateButton.classList.remove("hidden");
+    firstNameField.removeAttribute("readonly");
+    lastNameField.removeAttribute("readonly");
+    userNameField.removeAttribute("readonly");
+    emailField.removeAttribute("readonly");
+});
+
+undoButton.addEventListener('click', async function(){
+    editButton.classList.remove("hidden");
+    undoButton.classList.add("hidden");
+    updateButton.classList.add("hidden");
+    firstNameField.setAttribute("readonly", true);
+    lastNameField.setAttribute("readonly", true);
+    userNameField.setAttribute("readonly", true);
+    emailField.setAttribute("readonly", true);  
+    const token = sessionStorage.getItem('token')
+    const userData = await fetchUser(token);
+    displayUserData(userData.user);
+});
+
+updateButton.addEventListener('click', async function(e){
+    e.preventDefault();
+    
+    const token = sessionStorage.getItem('token')
+    const userData = await fetchUser(token);
+    const updateData ={
+        id: userData.user.id,
+        firstname: document.getElementById("first-name").value,
+        lastname: document.getElementById("last-name").value,
+        username: document.getElementById("username-profile").value,
+        email: document.getElementById("email-profile").value
+    }
+   
+    const response = await updateUser(updateData, token);
+
+});
+
+async function updateUser(upadeData, token) {
+    try{
+        fetch(`http://localhost:8080/api/users/${upadeData.id}`,{
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+                },
+            body: JSON.stringify(upadeData)
+        })
+        .then(response =>{
+            if(response.ok){
+                showNotification("User Updated successfully!", "success");
+                editButton.classList.remove("hidden");
+                undoButton.classList.add("hidden");
+                updateButton.classList.add("hidden");
+            }else{
+                showNotification(`An error occurred while updating the user ${response.statusText}`, "error");
+            }
+        })
+    }catch(err){
+        showNotification(`An error occurred while updating the user ${err}`, "error");
+        return;
+    }
+}
 
 
 /*FUNCTIONS*/
