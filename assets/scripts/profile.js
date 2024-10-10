@@ -212,10 +212,10 @@ function addDeleteButtonListeners() {
 // Function to handle deleting a destination
 async function deleteDestination(destinationId) {
     const token = sessionStorage.getItem('token');
-    
+
     // Ask for confirmation before proceeding with the deletion
     const confirmDelete = window.confirm("Are you sure you want to delete this travel destination?");
-    
+
     if (confirmDelete) {
         try {
             const response = await fetch(`http://localhost:8080/api/traveldestinations/${destinationId}`, {
@@ -301,40 +301,69 @@ function handleSaveButtonClick(inputs, select, saveButton) {
     const updatedObject = {
         title: inputs[0].value,
         description: inputs[1].value,
-        location: select.value,
+        locationId: select.value,
         dateFrom: inputs[3].value,
         dateTo: inputs[4].value,
     };
 
+    // Get the destination ID from the save button dataset
+    const destinationId = saveButton.dataset.id;
+
+    // Call the update endpoint (PUT request)
+    const token = sessionStorage.getItem('token');
+    fetch(`http://localhost:8080/api/traveldestinations/${destinationId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedObject),
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to update travel destination');
+            }
+        })
+        .then(data => {
+            console.log("Update successful:", data);
+            alert('Travel destination updated successfully.');
+
+            // Disable inputs after saving
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+            select.disabled = true; // Disable the select
+
+            // Restore the edit button
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.className = "edit-btn";
+            editButton.dataset.id = saveButton.dataset.id;
+            editButton.addEventListener("click", (e) => {
+                handleEditButtonClick(e);
+            });
+
+            // Restore the delete button
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "delete-btn";
+            deleteButton.dataset.id = saveButton.dataset.id;
+
+            // Replace save and undo buttons with edit and delete
+            const actionButtons = saveButton.parentElement;
+            actionButtons.innerHTML = ""; // Clear existing buttons
+            actionButtons.appendChild(editButton);
+            actionButtons.appendChild(deleteButton);
+        })
+        .catch(error => {
+            console.error("Error updating destination:", error);
+            alert('An error occurred while updating the destination.');
+        });
+
     // Print the updated object to the console
     console.log("Updated Object:", updatedObject);
-
-    // Disable inputs after saving
-    inputs.forEach(input => {
-        input.disabled = true;
-    });
-    select.disabled = true; // Disable the select
-
-    // Restore the edit button
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    editButton.className = "edit-btn";
-    editButton.dataset.id = saveButton.dataset.id;
-    editButton.addEventListener("click", (e) => {
-        handleEditButtonClick(e);
-    });
-
-    // Restore the delete button
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.className = "delete-btn";
-    deleteButton.dataset.id = saveButton.dataset.id;
-
-    // Replace save and undo buttons with edit and delete
-    const actionButtons = saveButton.parentElement;
-    actionButtons.innerHTML = ""; // Clear existing buttons
-    actionButtons.appendChild(editButton);
-    actionButtons.appendChild(deleteButton);
 }
 
 // Function to handle the undo button click event
