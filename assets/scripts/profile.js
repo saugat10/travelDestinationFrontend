@@ -112,7 +112,7 @@ async function fetchUser(token) {
 function displayUserData(user) {
     document.getElementById('first-name').value = user.firstname;
     document.getElementById('last-name').value = user.lastname;
-    document.getElementById('username').value = user.username;
+    document.getElementById('username-profile').value = user.username;
     document.getElementById('email-profile').value = user.email;
     //TODO: understand if password is needed or not
 }
