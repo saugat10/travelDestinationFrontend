@@ -247,6 +247,7 @@ async function handleEditButtonClick(event) {
     const inputs = row.querySelectorAll("input");
     const select = row.querySelector("select");
     const isDisabled = inputs[0].disabled; // Check the disabled state of the first input
+    const originalId = event.target.dataset.id; // Store the original ID
 
     // Store original values for undo
     const originalValues = Array.from(inputs).map(input => input.value);
@@ -276,7 +277,7 @@ async function handleEditButtonClick(event) {
     const saveButton = document.createElement("button");
     saveButton.textContent = "Save";
     saveButton.className = "save-btn";
-    saveButton.dataset.id = editButton.dataset.id; // Maintain the same ID
+    saveButton.dataset.id = originalId; // Maintain the same ID
     saveButton.addEventListener("click", () => {
         handleSaveButtonClick(inputs, select, saveButton);
     });
@@ -286,7 +287,7 @@ async function handleEditButtonClick(event) {
     undoButton.textContent = "Undo";
     undoButton.className = "undo-btn";
     undoButton.addEventListener("click", () => {
-        handleUndoButtonClick(inputs, select, originalValues, originalLocation);
+        handleUndoButtonClick(inputs, select, originalValues, originalLocation, originalId);
     });
 
     // Replace edit and delete buttons with save and undo
@@ -367,7 +368,7 @@ function handleSaveButtonClick(inputs, select, saveButton) {
 }
 
 // Function to handle the undo button click event
-function handleUndoButtonClick(inputs, select, originalValues, originalLocation) {
+function handleUndoButtonClick(inputs, select, originalValues, originalLocation, originalId) {
     // Restore original values and disable inputs
     inputs.forEach((input, index) => {
         input.value = originalValues[index]; // Set original value
@@ -375,7 +376,6 @@ function handleUndoButtonClick(inputs, select, originalValues, originalLocation)
     });
 
     // Disable the select and set its value to the original location
-    // Reset the select element
     select.innerHTML = ''; // Clear existing options
     const option = document.createElement('option');
     option.value = originalLocation; // Set the value to the original location
@@ -383,12 +383,11 @@ function handleUndoButtonClick(inputs, select, originalValues, originalLocation)
     select.appendChild(option); // Add the original location as the only option
     select.disabled = true; // Disable the select
 
-
     // Restore the edit button
     const editButton = document.createElement("button");
     editButton.textContent = "Edit";
     editButton.className = "edit-btn";
-    editButton.dataset.id = inputs[0].dataset.id; // Use the same ID
+    editButton.dataset.id = originalId; // Use the passed original ID
     editButton.addEventListener("click", (e) => {
         handleEditButtonClick(e);
     });
@@ -397,6 +396,7 @@ function handleUndoButtonClick(inputs, select, originalValues, originalLocation)
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.className = "delete-btn";
+    deleteButton.dataset.id = originalId; // Ensure ID is reassigned
 
     // Replace undo and save buttons with edit and delete
     const actionButtons = inputs[0].closest("td").parentElement.querySelector(".action-buttons");
