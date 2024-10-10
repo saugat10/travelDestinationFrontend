@@ -38,6 +38,13 @@ body {
   font-size: 1.2rem;
 }
 
+.nav-link.button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
 .button {
   display: inline-block;
   padding: 10px 20px;
@@ -106,6 +113,10 @@ body {
   }
 }
 
+.travel-destinations h2 {
+  margin: 2rem 0 3rem 0;
+  text-align: center;
+}
 .modal {
   display: none;
   position: fixed;
@@ -135,7 +146,6 @@ body {
 .modal-content input[type="password"] {
   width: 100%;
   padding: 10px;
-  /* margin: 10px 0; */
   border: 1px solid #ccc;
   border-radius: 5px;
 }
@@ -186,25 +196,27 @@ body {
 }
 
 .destinations-container {
-  display: flex;
-  flex-wrap: wrap;
-  overflow-x: hidden;
-  gap: 20px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  justify-items: center;
 }
 
 .destination-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   background-color: #f9f9f9;
-  border: 1px solid #ccc;
   border-radius: 10px;
   padding: 15px;
-  min-width: 300px;
-  max-width: 350px;
+  width: 12rem;
+  height: 9rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: relative;
+  /* position: relative; */
   transition: width 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
-  flex: 0 1 auto;
+  /* flex: 0 1 auto; */
+  margin: 0;
+  margin-bottom: 2rem;
 }
 
 .destination-card:hover {
@@ -212,19 +224,9 @@ body {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.destination-card img {
-  width: 100%;
-  border-radius: 10px 10px 0 0;
-}
-
 .destination-title {
-  font-size: 1.5rem;
-  margin: 10px 0;
-}
-
-.destination-dates {
+  font-size: 0.8rem;
   color: #555;
-  font-size: 1rem;
 }
 
 .notification {
