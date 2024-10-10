@@ -15,6 +15,8 @@ fetch('./navbar.html')
     const signInForm = document.getElementById('signInForm');
     const signUpForm = document.getElementById('signUpForm');
     const notification = document.getElementById('notification');
+    const profileBtn = document.getElementById('profileBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     hamburger.addEventListener('click', () => {
       navbarLinks.classList.toggle('active');
@@ -73,6 +75,11 @@ fetch('./navbar.html')
           sessionStorage.setItem('token', data.token);
 
           showNotification('Sign in successful!', 'success');
+          signInModal.style.display = 'none';
+          signInBtn.classList.add('hidden');
+          signUpBtn.classList.add('hidden');
+          profileBtn.classList.remove('hidden');
+          signOutBtn.classList.remove('hidden');
           //TODO: 
           // - maybe do not redirect but just log in 
           // - show navbar as signed up user as well
@@ -124,5 +131,24 @@ fetch('./navbar.html')
         showNotification("An error occurred", e.message, 'error');
       }
     });
+
+    signOutBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      sessionStorage.removeItem("token");
+      window.location.href = '../../pages/index.html';
+    });
+
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      signInBtn.classList.add('hidden');
+      signUpBtn.classList.add('hidden');
+      profileBtn.classList.remove('hidden');
+      signOutBtn.classList.remove('hidden');
+    }else{
+      signInBtn.classList.remove('hidden');
+      signUpBtn.classList.remove('hidden');
+      profileBtn.classList.add('hidden');
+      signOutBtn.classList.add('hidden');
+    }
     
   });
