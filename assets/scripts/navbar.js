@@ -13,7 +13,10 @@ fetch('./navbar.html')
     const signUpBtn = document.getElementById('signUpBtn');
     const closeSignUpModal = document.getElementById('closeSignUpModal');
     const signInForm = document.getElementById('signInForm');
+    const signUpForm = document.getElementById('signUpForm');
     const notification = document.getElementById('notification');
+    const profileBtn = document.getElementById('profileBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     hamburger.addEventListener('click', () => {
       navbarLinks.classList.toggle('active');
@@ -72,6 +75,11 @@ fetch('./navbar.html')
           sessionStorage.setItem('token', data.token);
 
           showNotification('Sign in successful!', 'success');
+          signInModal.style.display = 'none';
+          signInBtn.classList.add('hidden');
+          signUpBtn.classList.add('hidden');
+          profileBtn.classList.remove('hidden');
+          signOutBtn.classList.remove('hidden');
           //TODO: 
           // - maybe do not redirect but just log in 
           // - show navbar as signed up user as well
@@ -84,4 +92,63 @@ fetch('./navbar.html')
         showNotification('An error occurred while signing up. Please try again.', 'error');
       }
     });
+
+    signUpForm.addEventListener('submit', async function (e) {
+      e.preventDefault(); // Prevent default form submission
+
+      // Get form inputs
+      const firstname = document.getElementById('firstName').value;
+      const lastname = document.getElementById('lastName').value;
+      const username = document.getElementById('userName').value;
+      const email = document.getElementById('signUpEmail').value;
+      const password = document.getElementById('signUpPassword').value;
+
+      // Make the POST request to the backend
+      try{
+        const response = await fetch('http://localhost:8080/api/users',{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ firstname, lastname, username, email, password }) // Send user details as JSON
+        });
+        const data = await response.json();
+
+        if(response.ok){
+          showNotification('Sign up successful!', 'success');
+          setTimeout(() => {
+            if(signUpModal){
+              signUpModal.style.display = 'none';
+            }
+            window.location.href = '../../pages/index.html';
+          },1000);
+          
+          
+        } else{
+          showNotification(`Sign up failed: ${data.message}`, 'error');;
+        }
+      }catch(e){
+        showNotification("An error occurred", e.message, 'error');
+      }
+    });
+
+    signOutBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      sessionStorage.removeItem("token");
+      window.location.href = '../../pages/index.html';
+    });
+
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      signInBtn.classList.add('hidden');
+      signUpBtn.classList.add('hidden');
+      profileBtn.classList.remove('hidden');
+      signOutBtn.classList.remove('hidden');
+    }else{
+      signInBtn.classList.remove('hidden');
+      signUpBtn.classList.remove('hidden');
+      profileBtn.classList.add('hidden');
+      signOutBtn.classList.add('hidden');
+    }
+    
   });

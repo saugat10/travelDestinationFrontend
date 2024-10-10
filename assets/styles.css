@@ -234,4 +234,8 @@
   .notification.hidden {
     display: none;
   }
+
+  .nav-link.button.hidden {
+    display: none;
+  }
   
