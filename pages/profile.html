@@ -18,24 +18,26 @@
         <!-- First Section: Profile Information -->
         <div class="section-header">
             <h2>Profile Information</h2>
-            <button class="edit-button">Edit</button>
+            <button class="edit-button" id="edit-button">Edit</button>
+            <button class="undo-button hidden" id="undo-button">Undo</button>
+            <button class="update-button hidden" id="update-button">Update</button>
         </div>
         <div class="profile-details">
             <div>
                 <label for="first-name">First Name</label>
-                <input type="text" class="input-box" id="first-name" readonly>
+                <input type="text" class="input-box" id="first-name" readonly required>
             </div>
             <div>
                 <label for="last-name">Last Name</label>
-                <input type="text" class="input-box" id="last-name" readonly>
+                <input type="text" class="input-box" id="last-name" readonly required>
             </div>
             <div>
                 <label for="username">Username</label>
-                <input type="text" class="input-box" id="username-profile" readonly>
+                <input type="text" class="input-box" id="username-profile" readonly required>
             </div>
             <div>
                 <label for="email-profile">Email</label>
-                <input type="text" class="input-box" id="email-profile" readonly>
+                <input type="text" class="input-box" id="email-profile" readonly required>
             </div>
         </div>
 
