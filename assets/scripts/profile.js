@@ -30,14 +30,14 @@ window.addEventListener('load', async function () {
     }
 });
 
-// Event listener for submitting the new travel destination form
+//  new travel destination form
 document.getElementById('destination-form').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     // Get form data
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
-    const location = document.getElementById('location').value;
+    const location = document.getElementById('location-create').value;
     const dateFrom = document.getElementById('start-date').value;
     const dateTo = document.getElementById('end-date').value;
 
@@ -81,6 +81,7 @@ document.getElementById('destination-form').addEventListener('submit', async fun
         console.error('Error submitting form:', error);
     }
 });
+
 
 /*FUNCTIONS*/
 // fetches user with token
@@ -174,7 +175,7 @@ function populateDestinationsTable(travelDestinations) {
           <td><input type="date" value="${new Date(dest.dateTo).toISOString().split('T')[0]}" disabled></td>
           <td class="action-buttons">
             <button class="edit-btn" data-id="${dest._id}">Edit</button>
-            <button class="delete-btn" data-id="${dest._id}">Delete</button>
+            <button id="delete-btn" class="delete-btn" data-id="${dest._id}">Delete</button>
           </td>
         `;
 
@@ -183,6 +184,8 @@ function populateDestinationsTable(travelDestinations) {
 
     // Add event listeners for the edit buttons
     addEditButtonListeners();
+    // Add event listenr for the delete button
+    addDeleteButtonListeners();
 }
 
 // Function to add event listeners to the edit buttons
@@ -195,6 +198,48 @@ function addEditButtonListeners() {
     });
 }
 
+// Function to add event listeners to delete buttons
+function addDeleteButtonListeners() {
+    const deleteButtons = document.querySelectorAll(".delete-btn");
+    deleteButtons.forEach(button => {
+        button.addEventListener("click", (e) => {
+            const destinationId = e.target.dataset.id;
+            deleteDestination(destinationId);
+        });
+    });
+}
+
+// Function to handle deleting a destination
+async function deleteDestination(destinationId) {
+    const token = sessionStorage.getItem('token');
+    
+    // Ask for confirmation before proceeding with the deletion
+    const confirmDelete = window.confirm("Are you sure you want to delete this travel destination?");
+    
+    if (confirmDelete) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/traveldestinations/${destinationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                document.querySelector(`button[data-id="${destinationId}"]`).closest('tr').remove();
+                alert('Travel destination deleted successfully.');
+            } else {
+                console.error(`Failed to delete destination with ID ${destinationId}.`);
+                alert('Failed to delete the travel destination. Please try again.');
+            }
+
+        } catch (error) {
+            console.error('Error deleting destination:', error);
+            alert('An error occurred while deleting the destination.');
+        }
+    }
+}
 
 // Function to handle the edit button click event
 async function handleEditButtonClick(event) {
@@ -233,7 +278,7 @@ async function handleEditButtonClick(event) {
     saveButton.className = "save-btn";
     saveButton.dataset.id = editButton.dataset.id; // Maintain the same ID
     saveButton.addEventListener("click", () => {
-        handleSaveButtonClick(inputs, select, saveButton, originalValues);
+        handleSaveButtonClick(inputs, select, saveButton);
     });
 
     // Create the undo button
@@ -252,12 +297,11 @@ async function handleEditButtonClick(event) {
 }
 
 // Function to handle the save button click event
-function handleSaveButtonClick(inputs, select, saveButton, originalValues) {
+function handleSaveButtonClick(inputs, select, saveButton) {
     const updatedObject = {
         title: inputs[0].value,
         description: inputs[1].value,
-        location: select.value, // Get the selected value from the dropdown
-        country: inputs[2].value, //TODO: never modify country manually, just modify the location and then fetch the country location
+        location: select.value,
         dateFrom: inputs[3].value,
         dateTo: inputs[4].value,
     };
@@ -330,28 +374,6 @@ function handleUndoButtonClick(inputs, select, originalValues, originalLocation)
     actionButtons.innerHTML = ""; // Clear existing buttons
     actionButtons.appendChild(editButton);
     actionButtons.appendChild(deleteButton);
-}
-
-// Function to handle deleting a destination
-async function deleteDestination(destinationId) {
-    const token = sessionStorage.getItem('token');
-    try {
-        const response = await fetch(`http://localhost:8080/api/traveldestinations/${destinationId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            document.querySelector(`button[data-id="${destinationId}"]`).closest('tr').remove();
-        } else {
-            console.error(`Failed to delete destination with ID ${destinationId}.`);
-        }
-    } catch (error) {
-        console.error('Error deleting destination:', error);
-    }
 }
 
 // Function to redirect with a message
